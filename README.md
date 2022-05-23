@@ -5,7 +5,18 @@ github 강제 푸시하다가 날아감..ㅠㅠㅠ 내 잔디
 # Release Note
 프로젝트 명을 모바일 주차 관제 시스템으로 명명  
 데이터베이스 구조 설계 및 테이블 정의  
-차량 인식을 위한 tensorflow-hub Object Detection 모델 적용  
+차량 인식을 위한 tensorflow-hub Object Detection 모델 적용(main.py)  
+데이터베이스에 필요한 데이터 삽입  
+번호판 프로세스 소스 생성 (number.py)  
+파이썬 DB 연동 (DB.py)  
+입,출차 프로세스 추가 (Classification.py)   
+number.py 소스 모듈화  
+차량 인식 1차 개선 (일정 거리 도달 시 인식, 차량 외 더미 박스를 추가하여 프레임 드랍 Fix)  
+number.py 소스 1차 개선 (차량 이미지 전처리 알고리즘 개선)  
+차량 번호 라벨링 과정에서 contour가 충돌하던 현상 Fix  
+차량이 두번 이상 인식 될때 번호판이 뭉개지는 현상 Fix  
+전기차 판별 알고리즘 추가 (isElectric)  
+경차 판별 모델 추가 (isCompact)  
 
 
 # Develop Enviornment
