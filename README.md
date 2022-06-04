@@ -1,9 +1,10 @@
-# mobile_parking_control_system
-해당 프로젝트는 영남대학교 정보통신공학과 2022년 1학기 종합설계및과제 과목에 의해 개발되었습니다. 
+# mobile_parking_payment_system
+사전 결제를 제공하며,레이저 OCR을 사용하지 않고 한대의 카메라를 이용한 모바일 사전 결제 시스템 
 APP 디자인 제공 : 용기의 흰불꽃  
 
 # Release Note
 프로젝트 명을 모바일 주차 관제 시스템으로 명명  
+프로젝트 명을 모바일 주차 결제 시스템으로 수정  
 데이터베이스 구조 설계 및 테이블 정의  
 차량 인식을 위한 tensorflow-hub Object Detection 모델 적용(main.py)  
 데이터베이스에 필요한 데이터 삽입  
