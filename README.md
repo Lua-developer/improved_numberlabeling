@@ -17,6 +17,7 @@ number.py 소스 1차 개선 (차량 이미지 전처리 알고리즘 개선)
 차량이 두번 이상 인식 될때 번호판이 뭉개지는 현상 Fix  
 전기차 판별 알고리즘 추가 (isElectric)  
 경차 판별 모델 추가 (isCompact)  
+사전 결제를 위한 안드로이드 어플리케이션 개발 및 디자인  
 
 
 # Develop Enviornment
