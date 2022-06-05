@@ -1,6 +1,12 @@
 # mobile_parking_payment_system
-사전 결제를 제공하며,레이저 OCR을 사용하지 않고 한대의 카메라를 이용한 모바일 사전 결제 시스템 
+사전 결제를 제공하며,레이저 OCR을 사용하지 않고 한대의 카메라를 이용한 모바일 사전 결제 시스템  
+한대의 카메라로 입차와 출차가 가능(한 주차장당 출차 인식용, 입차 인식용 두대 사용)  
+경제성과 편리함을 동시에 잡아 사업성이 매우 높은 아이디어 
 APP 디자인 제공 : 용기의 흰불꽃  
+
+## Presentation
+![image](https://user-images.githubusercontent.com/83262616/172036757-4e7e12db-2038-48a2-8529-f84e40c26f15.png)
+![image](https://user-images.githubusercontent.com/83262616/172036759-f99dee8d-0360-4de5-aa71-4d6348ebf430.png)
 
 # Release Note
 프로젝트 명을 모바일 주차 관제 시스템으로 명명  
