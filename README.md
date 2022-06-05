@@ -24,16 +24,18 @@ number.py 소스 1차 개선 (차량 이미지 전처리 알고리즘 개선)
 차량이 두번 이상 인식 될때 번호판이 뭉개지는 현상 Fix  
 전기차 판별 알고리즘 추가 (isElectric)  
 경차 판별 모델 추가 (isCompact)  
-사전 결제를 위한 안드로이드 어플리케이션 개발 및 디자인  
-
+사전 결제를 위한 안드로이드 어플리케이션 개발 및 디자인    
+## 실행 방법
+아래에 작성한 모든 환경은 모두 설정이 되어 있어야합니다.  
+php 서버 실행 방법 : https://blog.naver.com/bjjy1113/222758599048  
 
 # Develop Enviornment
 **DataBase :MySQL Workbench 8.0.2  
-Main Programming : Python 3  
+Web Server : XAMPP
+Main Programming : Python 3, Tool : VS code
 Library : numpy, matplotlib.pyplot, opencv, pymysql, tensorflow, keras, pandas, etc..**  
 
 # 프로젝트 실행 예시
-
 **전기차 번호판 인식결과**   
 <img src="https://user-images.githubusercontent.com/83262616/169675812-2309952e-2c1a-4f84-af01-2913b52b4b64.PNG" width="500">
 <img src="https://user-images.githubusercontent.com/83262616/169675880-ab998337-db8f-41c8-9714-01cbd280036e.png" width="500">
