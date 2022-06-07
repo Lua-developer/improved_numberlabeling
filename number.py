@@ -30,7 +30,7 @@ MAX_PLATE_RATIO = 10
 #어떤게 번호판처럼 생겼는지?
 
 MIN_AREA = 80
-MIN_WIDTH, MIN_HEIGHT = 2, 8
+MIN_WIDTH, MIN_HEIGHT = 2, 10
 MIN_RATIO, MAX_RATIO = 0.5, 1.0
 
 def find_chars(contour_list):
@@ -88,7 +88,10 @@ def find_chars(contour_list):
 
 # 1단계 이미지 전처리
 def labeling_bulid_1(img_ori):
-    height, width, channel = img_ori.shape
+    try :
+        height, width, channel = img_ori.shape
+    except AttributeError :
+        return None, None
     possible_contours = []
     '''
     1차 이미지 전처리
@@ -163,9 +166,10 @@ def labeling_bulid_1(img_ori):
 
     for d in possible_contours:
         cv2.rectangle(temp_result, pt1=(d['x'], d['y']), pt2=(d['x']+d['w'], d['y']+d['h']), color=(255, 255, 255), thickness=2)
-    
-    result_idx = find_chars(possible_contours)
-
+    try :
+        result_idx = find_chars(possible_contours)
+    except IndexError :
+        return None, None
     matched_result = []
     for idx_list in result_idx:
         matched_result.append(np.take(possible_contours, idx_list))
@@ -233,11 +237,12 @@ def labeling_bulid_1(img_ori):
     # 보정이 들어갔다면 해당 조건을 실행
     # 계산된 특성을 추출하고 리스트로 매핑하여 반환
     else :
-        np.squeeze(plate_imgs)
-        #print(type(plate_imgs))
-        #plate_imgs = np.array(new_plate, dtype=np.uint8)
-        new_plate = plate_imgs.pop()
-        new_plate = [new_plate]
+        try :
+            np.squeeze(plate_imgs)
+            new_plate = plate_imgs.pop()
+            new_plate = [new_plate]
+        except IndexError :
+            return None, None
         return new_plate, plate_infos
 # 여기까지 labeling_bulid_1, plate_img 라는 전처리가 완료된 이미지 객체를 labeling_bulid_2 함수로 전달
     
@@ -253,8 +258,6 @@ def labeling_bulid_2(MIN_AREA, MIN_WIDTH, MIN_HEIGHT, MIN_RATIO, MAX_RATIO, plat
     for i, plate_img in enumerate(plate_imgs):
         plate_img = cv2.resize(plate_img, dsize=(0, 0), fx=1.6, fy=1.6)
         _, plate_img = cv2.threshold(plate_img, thresh=0.0, maxval=255.0, type=cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    
-    # 
         contours, _ = cv2.findContours(plate_img, mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
     
         plate_min_x, plate_min_y = plate_img.shape[1], plate_img.shape[0]
@@ -285,13 +288,12 @@ def labeling_bulid_2(MIN_AREA, MIN_WIDTH, MIN_HEIGHT, MIN_RATIO, MAX_RATIO, plat
         커널은 3,3 이 적당함, 표준편차를 조정하며 번호판에서 라벨링된 글자를 blurring 하여 sharp하게 만듬
         해당 소스에서 잡아내지 못한 번호판 잡음은 main 단에서 다시 한번 예외처리
         '''
-        img_result = plate_img[plate_min_y:plate_max_y, plate_min_x+10:plate_max_x - 5]
+        img_result = plate_img[plate_min_y:plate_max_y+5, plate_min_x:plate_max_x+10]
         try :
-            img_result = cv2.GaussianBlur(img_result, ksize=(3, 3), sigmaX=0.5)
+            img_result = cv2.GaussianBlur(img_result, ksize=(3, 3), sigmaX=0.3)
         except IndexError :
-            return None
+            return None, None
         _, img_result = cv2.threshold(img_result, thresh=0.0, maxval=255.0, type=cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-        img_result = cv2.copyMakeBorder(img_result, top=10, bottom=10, left=10, right=10, borderType=cv2.BORDER_CONSTANT, value=(0,0,0))
         # 번호판 디버깅시 사용
         plt.imshow(img_result)
         plt.show()
@@ -310,10 +312,10 @@ def labeling_bulid_2(MIN_AREA, MIN_WIDTH, MIN_HEIGHT, MIN_RATIO, MAX_RATIO, plat
         if has_digit and len(plate_chars) > longest_text:
             longest_idx = i
         info = plate_infos[longest_idx]
-        isDiscount = cf.isElectric(info, ori_img)
-        if isDiscount != 1 :
-            isDiscount = cf.isCompactCar(ori_img)
+        isDiscount = cf.isCompactCar(ori_img)
+        if isDiscount != 1 :        
+            isDiscount = cf.isElectric(info, ori_img)
         if len(result_chars) >= 7 or len(result_chars) <= 9 :
             return result_chars, isDiscount
         else :
-            return None
+            return None, None

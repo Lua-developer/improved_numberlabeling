@@ -1,8 +1,6 @@
 '''
 Mobile Parking Control System
 main.py
-주의 사항 : 인터넷에서 떠올 땐 원본 영상의 파일 확장자가 png , 
-카카오톡으로 받은 jpg 포맷 이미지는 사용 불가
 '''
 import tensorflow_hub as hub
 import cv2
@@ -71,9 +69,9 @@ while(True) :
         # 디텍터가 돌때 프레임 다운되는 현상 해결
         # for start
         for score, (ymin,xmin,ymax,xmax), label in zip(pred_scores, pred_boxes, pred_labels):
-            if score < 0.7 or label != 'car' :
+            conn.commit()
+            if score < 0.6 or label != 'car' :
             # 시연때는 사진 같은거로 보여줘야 하므로 로스를 높임
-            # if score < 0.4 :
                 '''
                 1.
                 학습된 객체 이미지 데이터와 실제 탐지된 객체의 유사도가 70% 미만 인 경우
@@ -87,14 +85,15 @@ while(True) :
                 '''
                 2.
                 바운딩 박스의 기준이 되는 xmax, xmin, ymax, ymin 의 값을 이용하여 탐지된 객체의 박스 넓이를 계산
-                약 계산된 사이즈가 250000이 될때 번호판 인식율이 좋음.
+                약 계산된 사이즈가 190000이 될때 번호판 인식율이 좋음.
                 박스의 크기가 기준에 충족하지 못하면 자동차 객체라도 다음 과정으로 넘어가지 않음
                 '''
                 x, y = xmax-xmin, ymax-ymin
                 size = x * y
-                cv2.putText(img_boxes,str(x*y),(xmin, ymin), font, 0.5, (0,0,0), 1, cv2.LINE_AA)
+                cv2.putText(img_boxes,str(size),(xmin, ymin), font, 0.5, (0,0,0), 1, cv2.LINE_AA)
+                result_ck = None
                 if label == "car" :
-                    # 박스 차량 박스 사이즈가 250000이 안된다면 간격이 멀리 있음
+                    # 박스 차량 박스 사이즈가 190000 안된다면 간격이 멀리 있음
                     if size < 190000 :
                         continue
                     else :
@@ -129,48 +128,63 @@ while(True) :
                                 count = 0
                                 continue
                             continue
-                        # 번호판 앞, 뒷자리 보정
-                        max_len = len(result_char) - 1
-                        if(max_len == None) :
-                            print("[에러] : 이미지 손상")
-                            continue
-                        # 보정된 대상 문자 열
-                        correction_char = ''
-                        # 아스키코드 기준 0, 9 사이의 값이 아니라면 제일 앞의 것이 잘못됨
+                        result_char = Cf.Dis(isDiscount)
+                        print("라벨링 차량 번호 : ", result_char)
+                        # 제일 앞 글자가 숫자가 아니라면 제일 앞 문자를 지운다.
                         # 보정
+                        '''
                         if result_char[0] < '0' or result_char[0] > '9' :
-                            for i in range(1, max_len+1) :
-                                correction_char += result_char[i]
+                            for i in range(1, 8) :
+                                try :
+                                    correction_char += result_char[i]
+                                except IndexError :
+                                    print("번호판 정보가 잘못됨.")
+                                    result_char = None
+                                    continue
+                                except TypeError :
+                                    print("번호판 정보가 잘못됨.")
+                                    result_char = None
+                                    continue
+                            result_char = None
                             result_char = correction_char
                         # 차량 앞번호가 2자리 인 경우 뒤에 4자리 외에 컷
                         # 보정
                         if result_char[2] < '0' or result_char[2] > '9' :
-                            if(max_len == None) :
-                                print("[에러] : 이미지 손상")
-                                continue
                             for i in range(0, 7) :
-                                correction_char += result_char[i]
+                                try :
+                                    correction_char += result_char[i]
+                                except IndexError :
+                                    print("번호판 정보가 잘못됨.")
+                                    result_char = None
+                                    continue
+                            result_char = None
                             result_char = correction_char
                         # 차량 앞번호가 3자리 인 경우 뒤에 4자리 외에 컷
                         # 보정
                         if result_char[3] < '0' or result_char[3] > '9' :
-                            if(max_len == None) :
-                                print("[에러] : 이미지 손상")
-                                continue
                             for i in range(0, 8) :
-                                correction_char += result_char[i]
-                            result_char = correction_char
-                        print("라벨링 성공 차량 번호 : ", result_char)
+                                try :
+                                    correction_char += result_char[i]
+                                except IndexError :
+                                    print("번호판 정보가 잘못됨.")
+                                    result_char = None
+                                    continue
+                                result_char = None
+                                result_char = correction_char
+                        if result_char == None :
+                            print("라벨링 실패 재시도")
+                            continue
+                        '''
                         Check = "SELECT * FROM car WHERE license_plate_number = %s"
                         cursor.execute(Check, (result_char)) 
                         result_ck = cursor.fetchall()
+                        print(result_ck)
                         if not result_ck :
+                            # 데베에 없으면 차 번호 인식 X
                             print("데이터 베이스에 존재 하지 않는 번호입니다. 재인식을 시도합니다.")
-                            cv2.waitKey(2000)
-                            cv2.destroyAllWindows()
                             continue
                         if result_ck[0][1] == None:
-                            Cf.entrance_car(result_char, location, isDiscount)
+                            result_char = Cf.entrance_car(result_char, location, isDiscount)
                             max_parking_area = max_parking_area - 1
                             print("현재 남은 공간 : ", max_parking_area)
                             # 운전자에게 차단기가 열렸다는 신호를 준다
