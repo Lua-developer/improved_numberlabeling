@@ -29,20 +29,20 @@ number.py 소스 1차 개선 (차량 이미지 전처리 알고리즘 개선)
 전기차 판별 알고리즘 개선  
 ## 실행 방법
 구현 환경
-Visual Studio Code(Python Module)
-MySQL WorkBench 8.0.2(DB)
-Android Studio(APP)
-Python Library 적어놓은 모든 라이브러리는 모두 설치해야함.
-pandas, numpy, tensorflow, tensorflow-hub, matplotlib.pyplot, opencv(cv2), etc..
-사용시 외부 웹캠 사용이 필수(해상도가 낮을 시 OCR 성능이 낮음)
-프로젝트 종료 시점으로 모든 예외처리가 되어있음.
-안드로이드 스튜디오 사용법
-php 파일은 xampp 설치 후 xampp->htdocs 폴더에 복붙
-php 서버 실행 방법(노트북 기준)
-cmd 실행 -> ipconfig 자신의 무선 랜 아이피를 사용해야함
-cmd -> cd C:\xampp\htdocs
-C:\xampp\php\php.exe -S 무선랜아이피:80
-참고 링크 : https://blog.naver.com/bjjy1113/222758599048
+Visual Studio Code(Python Module)  
+MySQL WorkBench 8.0.2(DB)  
+Android Studio(APP)  
+Python Library 적어놓은 모든 라이브러리는 모두 설치해야함.  
+pandas, numpy, tensorflow, tensorflow-hub, matplotlib.pyplot, opencv(cv2), etc..  
+사용시 외부 웹캠 사용이 필수(해상도가 낮을 시 OCR 성능이 낮음)  
+프로젝트 종료 시점으로 모든 예외처리가 되어있음.  
+안드로이드 스튜디오 사용법  
+php 파일은 xampp 설치 후 xampp->htdocs 폴더에 복붙  
+php 서버 실행 방법(노트북 기준)  
+cmd 실행 -> ipconfig 자신의 무선 랜 아이피를 사용해야함  
+cmd -> cd C:\xampp\htdocs  
+C:\xampp\php\php.exe -S 무선랜아이피:80  
+참고 링크 : https://blog.naver.com/bjjy1113/222758599048  
 
 # Develop Enviornment
 **DataBase :MySQL Workbench 8.0.2  
