@@ -1,20 +1,24 @@
-from unittest import result
 import cv2
 import Classification as cf
 import numpy as np
 import matplotlib.image as img 
-import matplotlib.pyplot as plt
-import pytesseract
 import datetime
 
 '''
 class processing
 영상 객체의 파일화 및 잘라내는 클래스
+__str__ 추가, img의 shape를 출력
 '''
 class processimg :
     # 생성자
     def __init__(self, img) :
         self.img = img
+    # 객체 상태 출력
+    def __str__(self) :
+        s = ''
+        w, h, c = self.img.shape
+        s += 'width = {} height = {} channel = {}'.format(width, height, channel)
+        return s
     # 이미지 크롭팅 함수
     def crop_img(self, img, x_min, x_max, y_min, y_max) :
         crop_img = img[y_min:y_min+y_max, x_min:x_min+x_max]
