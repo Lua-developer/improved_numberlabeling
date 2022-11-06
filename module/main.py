@@ -1,13 +1,14 @@
 '''
 Mobile Parking Control System
 main.py
-최종 수정 시각 : 2022-10-29
-변경 사항 : 1차 리팩토링
+최종 수정 시각 : 2022-11-06
+변경 사항 : image 모듈 추가 및 video 1차 최적화
 '''
 import tensorflow_hub as hub
 import cv2
 import pandas as pd
 import Classification as Cf
+import image
 from number import labeling_bulid_1
 from number import labeling_bulid_2
 import DB as db
@@ -34,6 +35,7 @@ def main() :
     cap = cv2.VideoCapture(0)
     counts = 0
     while(True) :
+            # 프레임을 받아온다.
             ret, frame = cap.read()
             # 줌인을 하는 함수가 아님, frame/1sec 단위로 모든 프레임을 자른다
             cv2.flip(frame, 1)
@@ -51,12 +53,17 @@ def main() :
             cropped = frame[minX:maxX, minY:maxY]
             '''
             # 이건 보기 편하게 하기 위해 윈도우 사이즈 확대
-            frame_img = cv2.resize(frame, (1024, 640)) 
-            # 좌우 반전 시키기
+            # 프레임마다 리사이즈 하게 되면 초당 60프레임 기준으로 리소스 낭비가 심함
+            # 주석처리
+            #frame_img = cv2.resize(frame, (1024, 640)) 
+            # 들어오는 프레임을 rgb2bgr
             rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         #Is optional but i recommend (float convertion and convert img to tensor image)
-            rgb_tensor = tensorflow.convert_to_tensor(frame_img, dtype=tensorflow.uint8)
+            rgb_tensor = tensorflow.convert_to_tensor(frame, dtype=tensorflow.uint8)
+            
+            
+            #rgb_tensor = tensorflow.convert_to_tensor(frame_img, dtype=tensorflow.uint8)
 
         #Add dims to rgb_tensor
             rgb_tensor = tensorflow.expand_dims(rgb_tensor , 0)
@@ -72,45 +79,49 @@ def main() :
             # for start
             for score, (ymin,xmin,ymax,xmax), label in zip(pred_scores, pred_boxes, pred_labels):
                 conn.commit()
+                # 차량이 아니면 검출하지 않음
                 if score < 0.6 or label != 'car' :
                 # 시연때는 사진 같은거로 보여줘야 하므로 로스를 높임
                     '''
-                    1.
-                    학습된 객체 이미지 데이터와 실제 탐지된 객체의 유사도가 70% 미만 인 경우
-                    더미 바운딩 박스를 생성하여 프레임이 드랍되는 현상을 방지함
+                    들어온 프레임에서 car 객체가 아닌 경우에는 box를 그리지 않음.
                     '''
-                    img_boxes = cv2.rectangle(frame_img,(0, 0),(0, 0),(0,0,0),1)
+                    img_boxes = cv2.rectangle(frame,(0, 0),(0, 0),(0,0,0),1)
+                    # img_boxes = cv2.rectangle(frame_img,(0, 0),(0, 0),(0,0,0),1)
                 else :
-                    score_txt = f'{100 * round(score,0)}'
-                    img_boxes = cv2.rectangle(frame_img,(xmin, ymax),(xmax, ymin),(0,0,0),1)   
+                    img_boxes = cv2.rectangle(frame,(xmin, ymax),(xmax, ymin),(0,0,0),1)                       
+                    #img_boxes = cv2.rectangle(frame_img,(xmin, ymax),(xmax, ymin),(0,0,0),1)   
                     font = cv2.FONT_HERSHEY_SIMPLEX
                     '''
-                    2.
+                    2. 차량 거리 계산
                     바운딩 박스의 기준이 되는 xmax, xmin, ymax, ymin 의 값을 이용하여 탐지된 객체의 박스 넓이를 계산
                     약 계산된 사이즈가 190000이 될때 번호판 인식율이 좋음.
                     박스의 크기가 기준에 충족하지 못하면 자동차 객체라도 다음 과정으로 넘어가지 않음
                     '''
                     x, y = xmax-xmin, ymax-ymin
                     size = x * y
+                    # 박스 사이즈와 위치 출력
                     cv2.putText(img_boxes,str(size),(xmin, ymin), font, 0.5, (0,0,0), 1, cv2.LINE_AA)
                     result_ck = None
                     if label == "car" :
-                        # 박스 차량 박스 사이즈가 190000 안된다면 간격이 멀리 있음
                         if size < 190000 :
                             continue
                         else :
                             # 시작
                             print("차량이 감지되었습니다.")
                             print("차량 배경 분리 작업을 시작합니다.")
-                        # 크롭된 이미지를 저장하고 파일명을 반환하는 함수 
-                            img_name = Cf.Crop_and_save(xmin, xmax, ymin, ymax, img_boxes)
-                            print("차량 배경 분리 완료 파일 명 :", img_name)
-                            print("차량 번호 라벨링 시도")
-                            # car_img는 crop된 이미지 객체에서 받아옵니다.
-                            car_img = cv2.imread("Capture/"+ img_name + ".png")
-                            # 차량 이미지 전처리 시작
-                            plate_img,plate_infos = labeling_bulid_1(car_img)
+                            # processimg 클래스 생성자 호출
+                            unprocess_img = image.processimg(img_boxes)
+                            crop_img, file_name = unprocess_img.crop_and_save(unprocess_img, xmin, xmax, ymin, ymax)
+                            # 파일 확장자 추가
+                            print("차량 배경 분리 완료 파일 명 : {}.png".format(file_name))
+                            print("차량 번호판 분리 및 번호 라벨링 시작")
+                            '''
+                            3. 번호판 추출 세션
+                            '''
+                            plate_img, plate_infos = labeling_bulid_1(crop_img)
+                            # 이미지 객체가 None이 반환된 경우 중단하고 다시 탐지
                             if plate_img == None :
+                                print("이미지 객체가 잘못되었습니다.")
                                 continue
                             # 라벨링이 끝난 번호를 반환합니다
                             result_char, isDiscount = labeling_bulid_2(MIN_AREA, MIN_WIDTH, MIN_HEIGHT, MIN_RATIO, MAX_RATIO, plate_img, plate_infos, car_img)
