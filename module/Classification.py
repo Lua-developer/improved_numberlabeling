@@ -1,28 +1,26 @@
 '''
 Mobile Parking Control System
 Classification.py
+최종 수정 : 2022_11_06 
+수정 내역
+image 클래스 내 모델에 입력할 전처리 함수 추가 및 적용
+DB 클래스 모듈 추가 및 적용
 '''
 import cv2
 import time as time
-from datetime import datetime
 import tensorflow as tf
 import keras
-import DB as db
+from DB import sql_connection
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from image import processimg
 
-# 차량 인식 후 번호판 추출에 불필요한 배경을 제거하는 함수입니다.
-def Crop_and_save(xmin, xmax, ymin, ymax, img) :
-    crop_img = img[ymin:ymin+ymax, xmin:xmin+xmax]
-    # 크롭된 이미지를 저장합니다, 파일 명은 현재 시간으로 저장
-    file_name = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-    cv2.imwrite("Capture/"+ file_name + ".png", crop_img)
-    return file_name
 # 입차 프로세스를 담당하는 함수
 def entrance_car(result_char, location, isDiscount) :
-    conn = db.con_and_make_cursor()
-    cursor = conn.cursor()
+    sql_conn = sql_connection()
+    cursor = sql_conn.cursor
+    connection = sql_conn.conn
     times = time.strftime('%m-%d %H:%M:%S')
     print("차량 입차 정보")
     select = "SELECT * FROM parking_lot as PL WHERE PL.park_id = %s"
@@ -33,11 +31,12 @@ def entrance_car(result_char, location, isDiscount) :
     # 입차 로그 업데이트
     update = "UPDATE car SET entry_time = %s, park_id = %s, discount = %s WHERE license_plate_number = %s"
     cursor.execute(update,(times, location, isDiscount, result_char))
-    conn.commit()
+    connection.commit()
 # 사전 결제차량 구분 후 사전 결제 차량일 시 출차
 def exit_car(result_char, location) :
-    conn = db.con_and_make_cursor()
-    cursor = conn.cursor()
+    sql_conn = sql_connection()
+    cursor = sql_conn.cursor
+    connection = sql_conn.conn
     times = time.strftime('%m-%d %H:%M:%S')
     print("차량 출차 정보")
     select = "SELECT * FROM car WHERE license_plate_number = %s"
@@ -57,7 +56,7 @@ def exit_car(result_char, location) :
         times = time.strftime('%Y-%m-%d %H:%M:%S')
         update_time = "UPDATE car SET entry_time = %s, departure_time = %s, pre_order = %s WHERE license_plate_number = %s"
         cursor.execute(update_time, (None, times, 0, result_char))
-        conn.commit()
+        connection.commit()
         return 1
 def isCompactCar(img) :
     '''
@@ -69,32 +68,18 @@ def isCompactCar(img) :
     '''
     compact_model ='compactcar.h5'
     model = keras.models.load_model(compact_model, compile=False, custom_objects={'tf': tf})
+    
     # 들어온 이미지를 학습한 이미지와 사이즈가 같게 정규화
-    preprocessed = preprocessing(img)
+    set_img = processimg(img)
+    set_img.machine_preprocessing(set_img)
     # 이미지를 모델에서 예측하는 단계
-    prediction = model.predict(preprocessed)
+    prediction = model.predict(set_img)
     # 첫번째 라벨은 경차 두번째라벨은 Ohter
     if prediction[0,0] > prediction[0,1] :
         print("할인 대상 차량 : 경차")
         return 1
     else :
         return 0
-
-def preprocessing(img):
-    '''
-    예측할 대상 이미지에 대해 학습된 훈련데이터와 동일한 사이즈로 변환합니다.
-    해당 함수는 반환값으로 정규화된 이미지를 반환합니다.
-    '''
-    frame_resized = cv2.resize(img, [224,224], interpolation=cv2.INTER_AREA)
-    
-    # 이미지 정규화
-    frame_normalized = (frame_resized.astype(np.float32) / 127.0) - 1
-
-    # 예측을 위해 reshape.
-    # 학습한 이미지와 사이즈가 동일하게 만든다.
-    frame_reshaped = frame_normalized.reshape((1, 224, 224, 3))
-    #print(frame_reshaped)
-    return frame_reshaped
 
 def isElectric(info, img) :
     '''
@@ -126,14 +111,15 @@ def isElectric(info, img) :
         return 0
 
 def order(result_char, location) :
-    conn = db.con_and_make_cursor()
-    cursor = conn.cursor()
+    sql_conn = sql_connection()
+    cursor = sql_conn.cursor
+    connection = sql_conn.conn
     # 포인트 결제 프로세스
     # 출차 시간 저장
     update = "UPDATE car SET departure_time = %s WHERE license_plate_number = %s"
     d_times = time.strftime('%Y-%m-%d %H:%M')
     cursor.execute(update,(d_times, result_char))
-    conn.commit()
+    connection.commit()
     print("결제 모듈을 실행합니다.")
     print("차량 번호 : ", result_char)
     print("회원의 주차 시간과 포인트를 조회합니다")
@@ -158,12 +144,12 @@ def order(result_char, location) :
     n_point = n_point - total_fee
     update = "UPDATE user SET points = %s WHERE license_plate_number = %s"
     cursor.execute(update,(n_point, result_char))
-    conn.commit()
+    connection.commit()
     # payment table 업데이트
     payment_t = time.strftime('%Y-%m-%d %H:%M')
     insert_payment = "INSERT INTO payment VALUES (%s, %s, %s, %s)"
     p_id = n_point / 10 + 201231
     cursor.execute(insert_payment, (p_id, payment_t, total_fee, str(id)))
-    conn.commit()
+    connection.commit()
     # 결제 모듈 종료
     print("포인트로 결제가 완료 되었습니다.")
