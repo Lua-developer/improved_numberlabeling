@@ -1,10 +1,10 @@
-# mobile_parking_payment_system
+# mobile_parking_control_system
 사전 결제를 제공하며,레이저 OCR을 사용하지 않고 한대의 카메라를 이용한 모바일 사전 결제 시스템  
 한대의 카메라로 입차와 출차가 가능(한 주차장당 출차 인식용, 입차 인식용 두대 사용)  
 경제성과 편리함을 동시에 잡아 사업성이 매우 유망합니다.  
 작품 최종 성적 : A+  
 APP 디자인 제공 : 용기의 흰불꽃  
-
+2022-11월 기준 소스 클린업 및 리팩토링 진행중  
 ## Presentation
 ![image](https://user-images.githubusercontent.com/83262616/172036757-4e7e12db-2038-48a2-8529-f84e40c26f15.png)
 ![image](https://user-images.githubusercontent.com/83262616/172036759-f99dee8d-0360-4de5-aa71-4d6348ebf430.png)
@@ -26,6 +26,10 @@ number.py 소스 1차 개선 (차량 이미지 전처리 알고리즘 개선)
 사전 결제를 위한 안드로이드 어플리케이션 개발 및 디자인   
 입차, 출차 중 데이터베이스가 업데이트 되지 않는 현상 Fix  
 전기차 판별 알고리즘 개선  
+캡쳐된 객체를 효율적으로 관리하기 위한 processing class 추가 (image 모듈)  
+DB Connection, cursor 클래스화  
+Classification.py 코드 일부 processing class merge 및 삭제  
+불필요한 기능 일부 제거  
 ## 구현
 Python3 (opencv, numpy, matplotlib, etc..)  
 MySQL 8.0.2(DB)  
