@@ -4,7 +4,6 @@
 경제성과 편리함을 동시에 잡아 사업성이 매우 유망합니다.  
 작품 최종 성적 : A+  
 APP 디자인 제공 : 용기의 흰불꽃  
-2022-11월 기준 소스 클린업 및 리팩토링 진행중  
 ## Presentation
 ![image](https://user-images.githubusercontent.com/83262616/172036757-4e7e12db-2038-48a2-8529-f84e40c26f15.png)
 ![image](https://user-images.githubusercontent.com/83262616/172036759-f99dee8d-0360-4de5-aa71-4d6348ebf430.png)
