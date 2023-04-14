@@ -2,6 +2,8 @@
 github : https://github.com/Lua-developer
 Programmed by Jung Jin Young
 reference : https://github.com/Mactto/License_Plate_Recognition
+last_update : 2023-04-15
+최종 변경 사항 : 컨투어 주석 제거(주석 잘못 함)
 '''
 
 # 테서랙트를 이용한 number.py
@@ -14,7 +16,6 @@ import matplotlib.image as img
 import matplotlib.pyplot as plt
 import pytesseract
 
-# 번호판 출력
 MAX_DIAG_MULTIPLYER = 5 # 5
 MAX_ANGLE_DIFF = 12.0 # 12.0
 MAX_AREA_DIFF = 0.5 # 0.5
@@ -22,13 +23,14 @@ MAX_WIDTH_DIFF = 0.8
 MAX_HEIGHT_DIFF = 0.2
 MIN_N_MATCHED = 3 # 3
 
-#똑바로 돌리기
+# lower, upper
 PLATE_WIDTH_PADDING = 1.3 # 1.3
 PLATE_HEIGHT_PADDING = 1.5 # 1.5
 MIN_PLATE_RATIO = 3
 MAX_PLATE_RATIO = 10
 #어떤게 번호판처럼 생겼는지?
 
+# car number area threshold range
 MIN_AREA = 80
 MIN_WIDTH, MIN_HEIGHT = 2, 10
 MIN_RATIO, MAX_RATIO = 0.5, 1.0
@@ -127,12 +129,8 @@ def labeling_bulid_1(img_ori):
         mode=cv2.RETR_LIST, 
         method=cv2.CHAIN_APPROX_SIMPLE
         )
-    ### 설명시 여기서 부터 설명
     '''
-    컨투어는 컴퓨터가 물체라고 생각하는 모든 범위에 대해 원하는 모양으로 틀을 그려준다.
-    관심영역을 검출하기 위해 원본 이미지와 동일한 크기의 검은색 이미지를 생성한다.
-    생성된 이미지에 컨투어를 그린다.
-    탐지된 컨투어에 의해 그려진 Bounding Box의 넓이를 계산하고 번호의 사이즈 범위를 만족 못하면 posible_contour list에 추가하지 않는다.
+    컨투어 계산
     '''
     temp_result = np.zeros((height, width, channel), dtype=np.uint8)
     cv2.drawContours(temp_result, contours=contours, contourIdx=-1, color=(255, 255, 255))
