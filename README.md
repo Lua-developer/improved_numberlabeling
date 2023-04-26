@@ -1,5 +1,5 @@
 # mobile_parking_control_system
-사전 결제를 제공하며,레이저 OCR을 사용하지 않고 한대의 카메라를 이용한 모바일 사전 결제 시스템  
+사전 결제를 제공하며,레이저 OCR을 사용하지 않고 카메라를 이용한 모바일 사전 결제 시스템  
 ## Presentation
 ![image](https://user-images.githubusercontent.com/83262616/172036757-4e7e12db-2038-48a2-8529-f84e40c26f15.png)
 ![image](https://user-images.githubusercontent.com/83262616/172036759-f99dee8d-0360-4de5-aa71-4d6348ebf430.png)
