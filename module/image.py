@@ -9,7 +9,7 @@ class processing
 영상 객체의 파일화 및 잘라내는 클래스
 __str__ 추가, img의 shape를 출력
 '''
-class processimg :
+class processing :
     # 생성자
     def __init__(self, img) :
         self.img = img
